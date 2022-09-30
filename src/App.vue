@@ -1,10 +1,8 @@
 <template>
   <div class="app">
     <HowToUse />
-    <SelectFile @data="setData" @headers="setHeaders" /><ExcelTable
-      v-if="showExcel"
-      v-bind:data="data"
-    />
+    <SelectFile @data="setData" />
+    <ExcelTable v-bind:initData="data" />
   </div>
 </template>
 
@@ -17,18 +15,13 @@ export default {
   components: { HowToUse, SelectFile, ExcelTable },
   data() {
     return {
-      showExcel: false,
       data: [],
+      selectedData: [],
     };
   },
   methods: {
     setData(data) {
-      console.log("setData success: ", data);
       this.data = data;
-    },
-
-    setHeaders(headers) {
-      this.showExcel = true;
     },
   },
 };
