@@ -44,11 +44,33 @@
 
 <script>
 import axios from "axios";
+// import { Schema, model } from "mongoose";
+
+// const PreRegisteredSchema = new Schema({
+//   email: {
+//     type: String,
+//     required: true,
+//   },
+//   puuid: {
+//     type: String,
+//     required: true,
+//   },
+// });
+// const PreRegistered = model("preregisteredUser", PreRegisteredSchema);
 
 const applicationAxios = axios.create({
   // withCredentials: true,
   baseURL:
     "http://alb-an2-d-pub-ggq-lol-1832451122.ap-northeast-2.elb.amazonaws.com",
+  // headers: {
+  // "Access-Control-Allow-Origin": "*",
+  // "Content-Type": "application/json",
+  // },
+});
+
+const localServerAxios = axios.create({
+  // withCredentials: true,
+  baseURL: "http://localhost:3000",
   // headers: {
   // "Access-Control-Allow-Origin": "*",
   // "Content-Type": "application/json",
@@ -105,13 +127,12 @@ export default {
       this.selectedData = this.data.filter((data) => data.selected);
     },
     async requestToEnroll(information) {
+      let puuid;
       try {
         const response = await applicationAxios.get(
           `/application/v1/summoners/by-name/${information.summonerName}`
         );
-        console.log(`puuid: `, response.data.puuid);
-        //console.log(`puuid: `, puuid);
-        // request to puuid
+        puuid = response.data.puuid;
       } catch (err) {
         for (let i in this.data) {
           if (this.data[i].id == information.id) {
@@ -119,7 +140,15 @@ export default {
             this.data[i].selected = false;
           }
         }
-        console.log("get puuid error: ", err);
+        console.log("Get puuid error: ", err);
+        return;
+      }
+
+      if (await this.isRegisterEnabled(information.id, information.email)) {
+        console.log("already existed email: ", information.email);
+      } else {
+        console.log("can register email: ", information.email);
+        await this.saveEmail(information.id, information.email, puuid);
       }
     },
 
@@ -128,6 +157,46 @@ export default {
       Object.entries(reqObject).forEach(async ([key, value]) => {
         await this.requestToEnroll(value);
       });
+    },
+
+    async isRegisterEnabled(id, email) {
+      try {
+        const params = {
+          email: email,
+        };
+        const response = await localServerAxios.get(`/preregistered-email`, {
+          params: params,
+        });
+        console.log(response);
+        return true;
+      } catch (err) {
+        for (let i in this.data) {
+          if (this.data[i].id == id) {
+            this.data[i].status = "이미 등록된 이메일입니다.";
+            this.data[i].selected = false;
+          }
+        }
+        console.log("checkEmail error: ", err);
+        return false;
+      }
+    },
+
+    async saveEmail(id, email, puuid) {
+      try {
+        const response = await localServerAxios.post(`/preregistered-email`, {
+          email: email,
+          puuid: puuid,
+        });
+        console.log(response);
+      } catch (err) {
+        for (let i in this.data) {
+          if (this.data[i].id == id) {
+            this.data[i].status = "사전 등록자 등록 에러";
+            this.data[i].selected = false;
+          }
+        }
+        console.log("saveEmail error: ", err);
+      }
     },
   },
 };
