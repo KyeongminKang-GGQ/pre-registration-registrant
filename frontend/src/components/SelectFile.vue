@@ -10,6 +10,7 @@
 
 <script>
 import * as XLSX from "xlsx";
+import { Status } from "./ExcelTable.vue";
 
 export default {
   data: function () {
@@ -45,11 +46,11 @@ export default {
 
             for (var i = 0; i < data.length; i++) {
               if (data[i].email === email) {
-                status = "이메일 중복";
+                status = Status.DUPLICATE_EMAIL;
               } else if (data[i].phone === phone) {
-                status = "전화번호 중복";
+                status = Status.DUPLICATE_NUMBER;
               } else if (data[i].summonerName === summonerName) {
-                status = "소환사명 중복";
+                status = Status.DUPLICATE_SUMMONER_NAME;
               }
             }
 

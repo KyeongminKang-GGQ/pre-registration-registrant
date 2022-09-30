@@ -22,11 +22,26 @@
       </th>
     </thead>
     <tbody>
-      <tr v-for="(line, index) in data" :key="index">
+      <tr
+        v-for="(line, index) in data"
+        :key="index"
+        :class="{
+          'gold-star': line.status === '',
+          'bronze-star': line.status === 'SUCCESS',
+          'silver-star':
+            line.status == 'DUPLICATE_NUMBER' ||
+            line.status == 'DUPLICATE_SUMMONER_NAME' ||
+            line.status == 'DUPLICATE_EMAIL',
+          'dark-silver-star':
+            line.status == 'ALREADY_REGISTERED' ||
+            line.status == 'ERROR_PUUID' ||
+            line.status == 'ERROR',
+        }"
+      >
         <td>
           <input
             type="checkbox"
-            :disabled="line.status != ''"
+            :disabled="line.status != '' || line.status == 'SUCCESS'"
             @change="selected($event)"
             v-model="line.selected"
           />
@@ -76,6 +91,16 @@ const localServerAxios = axios.create({
   // "Content-Type": "application/json",
   // },
 });
+
+export const Status = {
+  DUPLICATE_NUMBER: "DUPLICATE_NUMBER",
+  DUPLICATE_SUMMONER_NAME: "DUPLICATE_SUMMONER_NAME",
+  DUPLICATE_EMAIL: "DUPLICATE_EMAIL",
+  ALREADY_REGISTERED: "ALREADY_REGISTERED",
+  ERROR_PUUID: "ERROR_PUUID",
+  ERROR: "ERROR",
+  SUCCESS: "SUCCESS",
+};
 
 export default {
   props: ["initData"],
@@ -136,19 +161,22 @@ export default {
       } catch (err) {
         for (let i in this.data) {
           if (this.data[i].id == information.id) {
-            this.data[i].status = "소환사명 에러";
+            this.data[i].status = Status.ERROR_PUUID;
             this.data[i].selected = false;
           }
         }
-        console.log("Get puuid error: ", err);
+        console.log(
+          `Get puuid error - summonerName: ${information.summonerName}, `,
+          err
+        );
         return;
       }
 
-      if (await this.isRegisterEnabled(information.id, information.email)) {
-        console.log("already existed email: ", information.email);
-      } else {
-        console.log("can register email: ", information.email);
+      try {
+        await this.isRegisterEnabled(information.id, information.email);
         await this.saveEmail(information.id, information.email, puuid);
+      } catch (err) {
+        // nothing
       }
     },
 
@@ -168,30 +196,39 @@ export default {
           params: params,
         });
         console.log(response);
-        return true;
       } catch (err) {
         for (let i in this.data) {
           if (this.data[i].id == id) {
-            this.data[i].status = "이미 등록된 이메일입니다.";
+            this.data[i].status = Status.ALREADY_REGISTERED;
             this.data[i].selected = false;
           }
         }
-        console.log("checkEmail error: ", err);
-        return false;
+        console.log(
+          `isRegisterEnabled error email is already exist: ${email}, `,
+          err
+        );
+        throw err;
       }
     },
 
     async saveEmail(id, email, puuid) {
       try {
+        console.log(`saveNewEmail: ${email}, ${puuid}`);
         const response = await localServerAxios.post(`/preregistered-email`, {
           email: email,
           puuid: puuid,
         });
+        for (let i in this.data) {
+          if (this.data[i].id == id) {
+            this.data[i].status = Status.SUCCESS;
+            this.data[i].selected = false;
+          }
+        }
         console.log(response);
       } catch (err) {
         for (let i in this.data) {
           if (this.data[i].id == id) {
-            this.data[i].status = "사전 등록자 등록 에러";
+            this.data[i].status = Status.ERROR;
             this.data[i].selected = false;
           }
         }
@@ -239,5 +276,21 @@ button {
   cursor: pointer;
   height: 40px;
   margin-left: 10px;
+}
+
+.gold-star {
+  background-color: #ffee58;
+}
+
+.silver-star {
+  background-color: #bdbdbd;
+}
+
+.bronze-star {
+  background-color: #cd7f32;
+}
+
+.dark-silver-star {
+  background-color: #555555;
 }
 </style>
