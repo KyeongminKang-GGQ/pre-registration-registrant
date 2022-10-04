@@ -1,20 +1,29 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 import HomeView from "../views/HomeView.vue";
-import AboutView from "../views/AboutView.vue";
+import GoogleView from "../views/GoogleView.vue";
+import LoginView from "../views/LoginView.vue";
+import ListView from "../views/ListView.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
     path: "/",
+    name: "login",
+    component: LoginView,
+  },
+  {
+    path: "/home",
     name: "home",
     component: HomeView,
   },
   {
-    path: "/about",
-    name: "about",
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: AboutView,
+    path: "/oauth/google",
+    name: "google",
+    component: GoogleView,
+  },
+  {
+    path: "/list",
+    name: "list",
+    component: ListView,
   },
 ];
 

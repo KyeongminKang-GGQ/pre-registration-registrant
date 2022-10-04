@@ -1,28 +1,19 @@
 <template>
-  <div class="app">
-    <HowToUse />
-    <SelectFile @data="setData" />
-    <ExcelTable v-bind:initData="data" />
+  <div>
+    <!-- HelloWorld msg="Welcome to Your Vue.js App"/-->
+    <router-view />
   </div>
 </template>
 
 <script>
-import HowToUse from "./components/HowToUse.vue";
-import SelectFile from "./components/SelectFile.vue";
-import ExcelTable from "./components/ExcelTable.vue";
+// import HelloWorld from '@/components/HelloWorld.vue'
 
 export default {
-  components: { HowToUse, SelectFile, ExcelTable },
-  data() {
-    return {
-      data: [],
-      selectedData: [],
-    };
-  },
-  methods: {
-    setData(data) {
-      this.data = data;
-    },
+  name: "App",
+  components: {
+    // HelloWorld,
   },
 };
 </script>
+
+<style></style>

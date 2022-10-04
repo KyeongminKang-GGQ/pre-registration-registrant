@@ -11,20 +11,41 @@ moduleAlias.addAliases({
 
 import { createServer } from "http";
 import { App } from "./app";
-import { Request, Response, Router } from "express";
 
 import dotenv from "dotenv";
-dotenv.config();
+import logger from "@common/logger";
+console.log(`start with env: ${process.env.ENVIRONMENT}`);
 
+// If ENV_PATH isn't null, set it as dotenv file.
+switch (process.env.ENVIRONMENT) {
+    case "dev": {
+        dotenv.config({
+            path: ".env.dev",
+        });
+        break;
+    }
+    case "stg": {
+        dotenv.config({
+            path: ".env.stg",
+        });
+        break;
+    }
+    case "prod": {
+        dotenv.config({
+            path: ".env.prod",
+        });
+        break;
+    }
+    default: {
+        dotenv.config();
+    }
+}
+
+console.log(`local web server: ${process.env.LOCAL_WEB_SERVER}`);
 const PORT = process.env.PORT || 3000;
 const app = new App().app;
 const server = createServer(app);
 
 server.listen(PORT, () => {
-    console.log(`Listening on :[${PORT}]...`);
-});
-
-const router = Router();
-router.get("/preregistered-email", (req: Request, res: Response) => {
-    console.log("[Server] request /preregistered-email");
+    logger.debug(`Listening on :[${process.env.ENVIRONMENT}], [${PORT}]...`);
 });

@@ -1,16 +1,20 @@
 <template>
-  <input
-    class="upload-name"
-    placeholder="사전예약자 명단 첨부(.xlsx)"
-    :value="fileName"
-  />
-  <label for="file">파일찾기</label>
-  <input type="file" id="file" @change="onChange" />
+  <div>
+    <input
+      class="upload-name"
+      placeholder="사전예약자 명단 첨부(.xlsx)"
+      :value="fileName"
+    />
+    <label for="file">파일찾기</label>
+    <input type="file" id="file" @change="onChange" />
+    <button @click="showList">사전 등록자 목록 보기</button>
+  </div>
 </template>
 
 <script>
 import * as XLSX from "xlsx";
 import { Status } from "./ExcelTable.vue";
+import router from "../router";
 
 export default {
   data: function () {
@@ -19,6 +23,10 @@ export default {
     };
   },
   methods: {
+    showList() {
+      router.push({ name: "list" });
+    },
+
     onChange(event) {
       const file = event.target.files[0];
       this.fileName = file.name;
@@ -39,8 +47,8 @@ export default {
           Object.entries(jsonData).forEach(([key, value]) => {
             const entries = Object.values(value);
             const date = this.convertToDate(entries[0]).toLocaleString();
-            const summonerName = entries[1];
-            const email = entries[2];
+            const email = entries[1];
+            const summonerName = entries[2];
             const phone = entries[3];
             let status = "";
 
@@ -135,5 +143,17 @@ input[type="file"] {
   padding: 0;
   overflow: hidden;
   border: 0;
+}
+
+button {
+  display: inline-block;
+  padding: 10px 20px;
+  margin-right: 20px;
+  color: #000000;
+  vertical-align: middle;
+  background-color: #ffd286;
+  cursor: pointer;
+  height: 40px;
+  margin-left: 20px;
 }
 </style>

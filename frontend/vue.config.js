@@ -7,10 +7,17 @@ module.exports = defineConfig({
     allowedHosts: "all",
     proxy: {
       "/preregistered-email": {
-        target: "http://localhost:3000/preregistered-email",
+        target: `${process.env.VUE_APP_LOCAL_SERVER}/preregistered-email`,
         changeOrigin: true,
         pathRewrite: {
           "^/preregistered-email": "",
+        },
+      },
+      "/login": {
+        target: `${process.env.VUE_APP_LOCAL_SERVER}/login`,
+        changeOrigin: true,
+        pathRewrite: {
+          "^/login": "",
         },
       },
     },
